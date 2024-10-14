@@ -1,7 +1,7 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { User, Admin, Course, Purchase } = require("./db");
-const {authUser, authAdmin} = require("./auth")
+const { authUser, authAdmin } = require("./auth");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 
@@ -9,6 +9,7 @@ require("dotenv").config();
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const PORT = process.env.PORT;
+const JWT_SECRET_Admin = process.env.JWT_SECRET_Admin;
 const JWT_SECRET = process.env.JWT_SECRET;
 const app = express();
 app.use(express.json());
@@ -79,8 +80,8 @@ app.post("/purchaseCourse", authUser, async function (req, res) {
   try {
     // Implement purchase logic here
     res.json({
-        message: "Hi"
-    })
+      message: "Hi",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error purchasing course",
@@ -152,7 +153,7 @@ app.post("/admin/signin", async function (req, res) {
         {
           id: admin._id.toString(),
         },
-        JWT_SECRET
+        JWT_SECRET_Admin
       );
 
       res.json({
@@ -171,9 +172,22 @@ app.post("/admin/signin", async function (req, res) {
   }
 });
 
-app.post("/admin/createCourse", async function (req, res) {
+app.post("/admin/createCourse", authAdmin,async function (req, res) {
   try {
     // Implement create course logic here
+    const courseName = req.body.courseName;
+    const courseDesc = req.body.courseDesc;
+    const coursePrice = req.body.coursePrice;
+
+    await Course.create({
+      title: courseName,
+      description: courseDesc,
+      price: coursePrice,
+    })
+
+    res.json({
+      message: "Course Created Succesfully!"
+    })
   } catch (error) {
     res.status(500).json({
       message: "Error creating course",

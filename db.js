@@ -21,7 +21,6 @@ const adminSchema = new Schema({
 const courseSchema = new Schema({
   title: String,
   description: String,
-  enrolledUsers: [{ type: ObjectId, ref: "User" }],
   price: Number,
 });
 
