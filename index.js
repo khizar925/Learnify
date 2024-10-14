@@ -79,9 +79,28 @@ app.post("/signin", async function (req, res) {
 app.post("/purchaseCourse", authUser, async function (req, res) {
   try {
     // Implement purchase logic here
-    res.json({
-      message: "Hi",
+    const courseName = req.body.courseName;
+    const amountPaid = req.body.amountPaid;
+    const paymentStatus = req.body.paymentStatus;
+    const course = await Course.findOne({
+      title: courseName,
     });
+    if (course) {
+      await Purchase.create({
+        userId: req.userId,
+        courseId: course._id,
+        purchaseDate: Date.now(),
+        amountPaid: amountPaid,
+        paymentStatus: paymentStatus,
+      });
+      res.json({
+        message: "Course Purchased Successfully!",
+      });
+    } else {
+      res.json({
+        message: "Course not Found",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       message: "Error purchasing course",
@@ -90,9 +109,30 @@ app.post("/purchaseCourse", authUser, async function (req, res) {
   }
 });
 
-app.get("/displayAllCourses", async function (req, res) {
+app.get("/displayAllCourses", authUser, async function (req, res) {
   try {
-    // Implement course display logic here
+    // Retrieve all courses, selecting only the title and description fields
+    const courses = await Course.find({}, "title description");
+
+    // Check if courses are available
+    if (courses.length > 0) {
+      const formattedCourses = courses.map((course, index) => {
+        return {
+          heading: `Course-${index + 1}`,
+          title: course.title,
+          description: course.description,
+        };
+      });
+
+      res.json({
+        message: "Courses retrieved successfully",
+        courses: formattedCourses, // Sending the formatted courses
+      });
+    } else {
+      res.json({
+        message: "No courses available",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       message: "Error displaying courses",
@@ -101,9 +141,34 @@ app.get("/displayAllCourses", async function (req, res) {
   }
 });
 
-app.get("/seePurchasedCourses", async function (req, res) {
+app.get("/seePurchasedCourses", authUser, async function (req, res) {
   try {
-    // Implement purchased courses display logic here
+    const userId = req.userId; // Retrieve the userId from the request (set by authUser middleware)
+
+    // Find all purchases for the specific user and populate course details (title, description)
+    const purchasedCourses = await Purchase.find({ userId: userId }).populate(
+      "courseId",
+      "title description"
+    );
+
+    if (purchasedCourses.length > 0) {
+      // If purchases exist, return the course details along with the purchase date
+      const formattedResponse = purchasedCourses.map((purchase, index) => ({
+        heading: `Course-${index + 1}`,
+        title: purchase.courseId.title,
+        description: purchase.courseId.description,
+        purchaseDate: purchase.purchaseDate,
+      }));
+
+      res.json({
+        message: "Purchased courses retrieved successfully",
+        courses: formattedResponse,
+      });
+    } else {
+      res.json({
+        message: "No purchased courses found",
+      });
+    }
   } catch (error) {
     res.status(500).json({
       message: "Error seeing purchased courses",
@@ -172,7 +237,7 @@ app.post("/admin/signin", async function (req, res) {
   }
 });
 
-app.post("/admin/createCourse", authAdmin,async function (req, res) {
+app.post("/admin/createCourse", authAdmin, async function (req, res) {
   try {
     // Implement create course logic here
     const courseName = req.body.courseName;
@@ -183,11 +248,11 @@ app.post("/admin/createCourse", authAdmin,async function (req, res) {
       title: courseName,
       description: courseDesc,
       price: coursePrice,
-    })
+    });
 
     res.json({
-      message: "Course Created Succesfully!"
-    })
+      message: "Course Created Succesfully!",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error creating course",
@@ -196,9 +261,25 @@ app.post("/admin/createCourse", authAdmin,async function (req, res) {
   }
 });
 
-app.post("/admin/deleteCourse", async function (req, res) {
+app.post("/admin/deleteCourse", authAdmin, async function (req, res) {
   try {
     // Implement delete course logic here
+    const courseTitle = req.body.courseName;
+    const course = await Course.findOne({
+      title: courseTitle,
+    });
+    const result = await Course.deleteOne({
+      _id: course.id,
+    });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({
+        message: "Course not found",
+      });
+    }
+
+    res.json({
+      message: "Course deleted successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: "Error deleting course",
