@@ -34,15 +34,15 @@ const purchaseSchema = new Schema({
 });
 
 // Create Models from Schemas
-const User = mongoose.model("User", userSchema);
-const Admin = mongoose.model("Admin", adminSchema);
-const Course = mongoose.model("Course", courseSchema);
-const Purchase = mongoose.model("Purchase", purchaseSchema);
+const UserModel = mongoose.model("User", userSchema);
+const AdminModel = mongoose.model("Admin", adminSchema);
+const CourseModel = mongoose.model("Course", courseSchema);
+const PurchaseModel = mongoose.model("Purchase", purchaseSchema);
 
 // Export the models
 module.exports = {
-  User,
-  Admin,
-  Course,
-  Purchase,
+  UserModel,
+  AdminModel,
+  CourseModel,
+  PurchaseModel,
 };
