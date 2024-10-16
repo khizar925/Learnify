@@ -31,7 +31,7 @@ adminRouter.post("/signup", async function (req, res) {
     });
   }
 });
-adminRouter.post("/ signin", async function (req, res) {
+adminRouter.post("/signin", async function (req, res) {
   try {
     const email = req.body.email;
     const password = req.body.password;
