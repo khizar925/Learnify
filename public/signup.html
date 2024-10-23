@@ -78,6 +78,7 @@
     </section>
 
     <script>
+        const WEBSITE_URL = process.env.WEBSITE_URL;
         async function signUp() {
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
@@ -97,7 +98,7 @@
 
             try {
                 // Sending sign-up request
-                const response = await axios.post('http://localhost:3000/api/v1/user/signup', {
+                const response = await axios.post(`{WEBSITE_URL}:3000/api/v1/user/signup`, {
                     name: name,
                     email: email,
                     password: password
