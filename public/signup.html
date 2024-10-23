@@ -98,7 +98,7 @@
 
             try {
                 // Sending sign-up request
-                const response = await axios.post(`${WEBSITE_URL}:3000/api/v1/user/signup`, {
+                const response = await axios.post(`${WEBSITE_URL}/api/v1/user/signup`, {
                     name: name,
                     email: email,
                     password: password
