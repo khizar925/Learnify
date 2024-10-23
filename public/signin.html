@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignIn</title>
+    <link rel="icon" href="/logo.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+
+<body class="bg-gray-900 text-white">
+    <section class="flex items-center justify-center min-h-screen">
+        <div
+            class="flex bg-gray-800 items-center justify-center px-4 py-10 sm:px-6 sm:py-16 lg:px-8 lg:py-8 shadow-md rounded-lg">
+            <div class="xl:mx-auto xl:w-full p-4 xl:max-w-sm 2xl:max-w-md">
+                <div class="mb-2 flex justify-center"></div>
+                <h2 class="text-center text-2xl font-bold leading-tight">
+                    Sign in to your account
+                </h2>
+                <p class="mt-2 text-center text-sm text-gray-400">
+                    Don't have an account? <a href="/signup.html"
+                        class="font-semibold text-blue-500 hover:underline">Sign Up</a>
+                </p>
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-base font-medium">Email address</label>
+                        <div class="mt-2">
+                            <input id="email" placeholder="Email" type="email"
+                                class="flex h-10 w-full rounded-md border border-gray-600 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50" />
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <label class="text-base font-medium">Password</label>
+                            <a class="text-sm font-semibold hover:underline" href="#" title="Forgot password?">Forgot
+                                password?</a>
+                        </div>
+                        <div class="mt-2">
+                            <input id="password" placeholder="Password" type="password"
+                                class="flex h-10 w-full rounded-md border border-gray-600 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-offset-1 disabled:cursor-not-allowed disabled:opacity-50" />
+                        </div>
+                    </div>
+                    <div>
+                        <button onclick="signIn()"
+                            class="inline-flex w-full items-center justify-center rounded-md bg-blue-600 px-3.5 py-2.5 font-semibold leading-7 hover:bg-blue-700"
+                            type="button">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                console.error("Email or password is missing.");
+                return;
+            }
+
+            try {
+                const response = await axios.post('http://localhost:3000/api/v1/user/signin', {
+                    email: email,
+                    password: password
+                });
+
+                // Check if the token is returned
+                if (response.data && response.data.token) {
+                    console.log('Sign in successful:', response.data);
+
+                    // Store the token in localStorage or sessionStorage
+                    localStorage.setItem('authToken', response.data.token);
+
+                    // Redirect to dashboard.html
+                    window.location.href = 'dashboard.html';
+                } else {
+                    console.error('No token received.');
+                }
+
+            } catch (error) {
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        console.error('User not found');
+                    } else if (error.response.status === 403) {
+                        console.error('Incorrect password');
+                    } else {
+                        console.error('Sign in failed:', error.response.data.message);
+                    }
+                } else {
+                    console.error('Sign in failed:', error.message);
+                }
+            }
+        }
+    </script>
+
+</body>
+
+</html>
